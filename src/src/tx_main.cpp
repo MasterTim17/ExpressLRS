@@ -856,6 +856,11 @@ void ProcessMSPPacket(mspPacket_t *packet)
 
     VtxTriggerSend();
   }
+  else if (packet->function == MSP_ELRS_BACKPACK_HEADTRACKER)
+  {
+    uint8_t headtrackerSequence[] = {packet->payload[0],packet->payload[1],packet->payload[2],packet->payload[3]};
+    crsf.packetQueueExtended(CRSF_FRAMETYPE_HEADTRACKER,headtrackerSequence,4);
+  }
 #endif
 }
 
