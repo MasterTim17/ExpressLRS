@@ -229,6 +229,12 @@ static struct luaItem_selection luaDvrStopDelay = {
     "0s;5s;15s;30s;45s;1min;2min",
     emptySpace};
 
+static struct luaItem_selection luaHeadtrackAux = {
+    {"Headtrack AUX", CRSF_TEXT_SELECTION},
+    0, // value
+    "Off;AUX1;!AUX1;AUX2;!AUX2;AUX3;!AUX3;AUX4;!AUX4;AUX5;!AUX5;AUX6;!AUX6;AUX7;!AUX7;AUX8;!AUX8;AUX9;!AUX9;AUX10;!AUX10",
+    emptySpace};
+
 //---------------------------- BACKPACK ------------------
 
 static char luaBadGoodString[10];
@@ -662,6 +668,11 @@ static void registerLuaParameters()
               config.SetDvrStopDelay(arg);
           },
           luaBackpackFolder.common.id);
+      registerLUAParameter(
+          &luaHeadtrackAux, [](luaPropertiesCommon *item, uint8_t arg) {
+              config.SetHeadtrackAux(arg);
+          },
+          luaBackpackFolder.common.id);
     }
   }
 
@@ -717,6 +728,7 @@ static int event()
     setLuaTextSelectionValue(&luaDvrAux, config.GetDvrAux());
     setLuaTextSelectionValue(&luaDvrStartDelay, config.GetDvrStartDelay());
     setLuaTextSelectionValue(&luaDvrStopDelay, config.GetDvrStopDelay());
+    setLuaTextSelectionValue(&luaHeadtrackAux, config.GetHeadtrackAux());
   }
 #if defined(TARGET_TX_FM30)
   setLuaTextSelectionValue(&luaBluetoothTelem, !digitalRead(GPIO_PIN_BLUETOOTH_EN));

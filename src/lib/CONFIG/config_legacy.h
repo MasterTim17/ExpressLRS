@@ -51,6 +51,7 @@ typedef struct {
     uint8_t         dvrAux:5;
     uint8_t         dvrStartDelay:3;
     uint8_t         dvrStopDelay:3;
+    uint8_t         headtrackAux;
 } v6_tx_config_t;
 
 /***

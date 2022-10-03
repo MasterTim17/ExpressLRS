@@ -61,6 +61,9 @@ bool InBindingMode = false;
 uint8_t MSPDataPackage[5];
 static uint8_t BindingSendCount;
 bool RxWiFiReadyToSend = false;
+#ifdef USE_TX_BACKPACK
+uint16_t headtrackerData[2] = {0};
+#endif
 
 static TxTlmRcvPhase_e TelemetryRcvPhase = ttrpTransmitting;
 StubbornReceiver TelemetryReceiver;
@@ -408,6 +411,25 @@ void ICACHE_RAM_ATTR SendRCdataToRF()
       otaPkt.std.type = PACKET_TYPE_MSPDATA;
       if (OtaIsFullRes)
       {
+#ifdef USE_TX_BACKPACK
+        if(config.GetHeadtrackAux() != 0)
+        {
+            uint8_t auxNumber = (config.GetHeadtrackAux() - 1) / 2 + 4;
+            uint8_t auxInverted = (config.GetHeadtrackAux() + 1) % 2;
+
+            bool state = CRSF_to_BIT(CRSF::ChannelData[auxNumber]) ^ auxInverted;
+            if(state)
+            {
+                CRSF::ChannelData[auxNumber] = N_to_CRSF(headtrackerData[0],900);
+                CRSF::ChannelData[auxNumber+1] = N_to_CRSF(headtrackerData[1],900);
+            }
+            else
+            {
+                CRSF::ChannelData[auxNumber] = CRSF_CHANNEL_VALUE_MID;
+                CRSF::ChannelData[auxNumber+1] = CRSF_CHANNEL_VALUE_MID;
+            }
+        }
+#endif
         otaPkt.full.msp_ul.packageIndex = MspSender.GetCurrentPayload(
           otaPkt.full.msp_ul.payload,
           sizeof(otaPkt.full.msp_ul.payload));
@@ -858,8 +880,8 @@ void ProcessMSPPacket(mspPacket_t *packet)
   }
   else if (packet->function == MSP_ELRS_BACKPACK_HEADTRACKER)
   {
-    uint8_t headtrackerSequence[] = {packet->payload[0],packet->payload[1],packet->payload[2],packet->payload[3]};
-    crsf.packetQueueExtended(CRSF_FRAMETYPE_HEADTRACKER,headtrackerSequence,4);
+    headtrackerData[0] = (packet->payload[0]<<8) + packet->payload[1] + 450;
+    headtrackerData[1] = (packet->payload[2]<<8) + packet->payload[3] + 450;
   }
 #endif
 }
