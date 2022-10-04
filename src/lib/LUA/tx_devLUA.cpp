@@ -22,6 +22,10 @@ static char tlmBandwidth[] = " (xxxxbps)";
 static const char folderNameSeparator[2] = {' ',':'};
 static const char switchmodeOpts4ch[] = "Wide;Hybrid";
 static const char switchmodeOpts8ch[] = "8ch;16ch Rate/2;12ch Mixed";
+static const char headtrackerOpts4ch[] = "Off";
+static const char headtrackerOpts8ch[] = "Off;AUX1;!AUX1;AUX2;!AUX2;AUX3;!AUX3;AUX4;!AUX4;AUX5;!AUX5;AUX6;!AUX6;AUX7;!AUX7;AUX8;!AUX8;AUX9;!AUX9;AUX10;!AUX10";
+static char headtrackerOut[7] = {0};
+
 
 #define HAS_RADIO (GPIO_PIN_SCK != UNDEF_PIN)
 
@@ -232,7 +236,7 @@ static struct luaItem_selection luaDvrStopDelay = {
 static struct luaItem_selection luaHeadtrackAux = {
     {"Headtrack AUX", CRSF_TEXT_SELECTION},
     0, // value
-    "Off;AUX1;!AUX1;AUX2;!AUX2;AUX3;!AUX3;AUX4;!AUX4;AUX5;!AUX5;AUX6;!AUX6;AUX7;!AUX7;AUX8;!AUX8;AUX9;!AUX9;AUX10;!AUX10",
+    headtrackerOpts4ch,
     emptySpace};
 
 //---------------------------- BACKPACK ------------------
@@ -729,6 +733,12 @@ static int event()
     setLuaTextSelectionValue(&luaDvrStartDelay, config.GetDvrStartDelay());
     setLuaTextSelectionValue(&luaDvrStopDelay, config.GetDvrStopDelay());
     setLuaTextSelectionValue(&luaHeadtrackAux, config.GetHeadtrackAux());
+    luaHeadtrackAux.options = OtaIsFullRes ? headtrackerOpts8ch : headtrackerOpts4ch;
+    if(OtaIsFullRes)
+      sprintf(headtrackerOut, "Aux%u&%u",(config.GetHeadtrackAux()+1)/2, (config.GetHeadtrackAux()+1)/2+1);
+    else
+      sprintf(headtrackerOut, "");
+    luaHeadtrackAux.units = headtrackerOut; 
   }
 #if defined(TARGET_TX_FM30)
   setLuaTextSelectionValue(&luaBluetoothTelem, !digitalRead(GPIO_PIN_BLUETOOTH_EN));
