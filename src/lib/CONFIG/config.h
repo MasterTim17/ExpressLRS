@@ -57,7 +57,7 @@ typedef struct {
                     unused: 3;          // FUTURE available
     uint8_t         dvrStartDelay:3,
                     dvrAux:5;
-    uint8_t         headtrackAux; 
+    uint8_t         headtrackCh; 
     tx_button_color_t buttonColors[2];  // FUTURE: TX RGB color / mode (sets color of TX, can be a static color or standard)
                                         // FUTURE: Model RGB color / mode (sets LED color mode on the model, but can be second TX led color too)
                                         // FUTURE: Custom button actions
@@ -89,7 +89,7 @@ public:
     uint8_t  GetDvrAux() const { return m_config.dvrAux; }
     uint8_t  GetDvrStartDelay() const { return m_config.dvrStartDelay; }
     uint8_t  GetDvrStopDelay() const { return m_config.dvrStopDelay; }
-    uint8_t  GetHeadtrackAux() const { return m_config.headtrackAux; }
+    uint8_t  GetHeadtrackCh() const { return m_config.headtrackCh; }
 
     // Setters
     void SetRate(uint8_t rate);
@@ -111,7 +111,7 @@ public:
     void SetDvrAux(uint8_t dvrAux);
     void SetDvrStartDelay(uint8_t dvrStartDelay);
     void SetDvrStopDelay(uint8_t dvrStopDelay);
-    void SetHeadtrackAux(uint8_t headtrackAux);
+    void SetHeadtrackCh(uint8_t headtrackCh);
 
     // State setters
     bool SetModelId(uint8_t modelId);

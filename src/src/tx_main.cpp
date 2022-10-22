@@ -411,25 +411,6 @@ void ICACHE_RAM_ATTR SendRCdataToRF()
       otaPkt.std.type = PACKET_TYPE_MSPDATA;
       if (OtaIsFullRes)
       {
-#ifdef USE_TX_BACKPACK
-        if(config.GetHeadtrackAux() != 0)
-        {
-            uint8_t auxNumber = (config.GetHeadtrackAux() - 1) / 2 + 4;
-            uint8_t auxInverted = (config.GetHeadtrackAux() + 1) % 2;
-
-            bool state = CRSF_to_BIT(CRSF::ChannelData[auxNumber]) ^ auxInverted;
-            if(state)
-            {
-                CRSF::ChannelData[auxNumber] = N_to_CRSF(headtrackerData[0],900);
-                CRSF::ChannelData[auxNumber+1] = N_to_CRSF(headtrackerData[1],900);
-            }
-            else
-            {
-                CRSF::ChannelData[auxNumber] = CRSF_CHANNEL_VALUE_MID;
-                CRSF::ChannelData[auxNumber+1] = CRSF_CHANNEL_VALUE_MID;
-            }
-        }
-#endif
         otaPkt.full.msp_ul.packageIndex = MspSender.GetCurrentPayload(
           otaPkt.full.msp_ul.payload,
           sizeof(otaPkt.full.msp_ul.payload));
@@ -452,6 +433,25 @@ void ICACHE_RAM_ATTR SendRCdataToRF()
     }
     else
     {
+#ifdef USE_TX_BACKPACK
+      if(config.GetHeadtrackCh() != 0 && OtaIsFullRes)
+      {
+          uint8_t auxNumber = (config.GetHeadtrackCh() - 1) / 2 + 4; // 1=ch5,3=ch6
+          uint8_t auxInverted = (config.GetHeadtrackCh() + 1) % 2;
+
+          bool state = CRSF_to_BIT(CRSF::ChannelData[auxNumber]) ^ auxInverted;
+          if(state)
+          {
+              CRSF::ChannelData[auxNumber] = N_to_CRSF(headtrackerData[0],900);
+              CRSF::ChannelData[auxNumber+1] = N_to_CRSF(headtrackerData[1],900);
+          }
+          else
+          {
+              CRSF::ChannelData[auxNumber] = CRSF_CHANNEL_VALUE_MID;
+              CRSF::ChannelData[auxNumber+1] = CRSF_CHANNEL_VALUE_MID;
+          }
+      }
+#endif
       // always enable msp after a channel package since the slot is only used if MspSender has data to send
       NextPacketIsMspData = true;
       OtaPackChannelData(&otaPkt, &crsf, TelemetryReceiver.GetCurrentConfirm(), ExpressLRS_currTlmDenom);

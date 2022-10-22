@@ -162,8 +162,9 @@ void TxConfig::Load()
             m_config.dvrStartDelay = value8;
         if (nvs_get_u8(handle, "dvrstopdelay", &value8) == ESP_OK)
             m_config.dvrStopDelay = value8;
-        if (nvs_get_u8(handle, "headtrackaux", &value8) == ESP_OK)
-            m_config.headtrackAux = value8;
+
+        if (nvs_get_u8(handle, "headtrackch", &value8) == ESP_OK)
+            m_config.headtrackCh = value8;
     }
     else
     {
@@ -271,7 +272,7 @@ void TxConfig::UpgradeEepromV6ToV7()
     LAZY(dvrAux);
     LAZY(dvrStartDelay);
     LAZY(dvrStopDelay);
-    LAZY(headtrackAux);
+    LAZY(headtrackCh);
     #undef LAZY
 
     for (unsigned i=0; i<64; i++)
@@ -329,7 +330,8 @@ TxConfig::Commit()
         nvs_set_u8(handle, "dvraux", m_config.dvrAux);
         nvs_set_u8(handle, "dvrstartdelay", m_config.dvrStartDelay);
         nvs_set_u8(handle, "dvrstopdelay", m_config.dvrStopDelay);
-        nvs_set_u8(handle, "headtrackaux", m_config.headtrackAux);
+
+        nvs_set_u8(handle, "headtrackch", m_config.headtrackCh);
     }
     nvs_set_u32(handle, "tx_version", m_config.version);
     nvs_commit(handle);
@@ -522,11 +524,11 @@ TxConfig::SetDvrStopDelay(uint8_t dvrStopDelay)
 }
 
 void
-TxConfig::SetHeadtrackAux(uint8_t headtrackAux)
+TxConfig::SetHeadtrackCh(uint8_t headtrackCh)
 {
-    if (GetHeadtrackAux() != headtrackAux)
+    if (GetHeadtrackCh() != headtrackCh)
     {
-        m_config.headtrackAux = headtrackAux;
+        m_config.headtrackCh = headtrackCh;
         m_modified |= MAIN_CHANGED;
     }
 }

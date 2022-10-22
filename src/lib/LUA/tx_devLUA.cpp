@@ -22,8 +22,8 @@ static char tlmBandwidth[] = " (xxxxbps)";
 static const char folderNameSeparator[2] = {' ',':'};
 static const char switchmodeOpts4ch[] = "Wide;Hybrid";
 static const char switchmodeOpts8ch[] = "8ch;16ch Rate/2;12ch Mixed";
-static const char headtrackerOpts4ch[] = "Off";
-static const char headtrackerOpts8ch[] = "Off;AUX1;!AUX1;AUX2;!AUX2;AUX3;!AUX3;AUX4;!AUX4;AUX5;!AUX5;AUX6;!AUX6;AUX7;!AUX7;AUX8;!AUX8;AUX9;!AUX9;AUX10;!AUX10";
+static const char headtrackerOptsLowRes[] = "Off";
+static const char headtrackerOptsFullRes[] = "Off;CH5;!CH5;CH6;!CH6;CH7;!CH7;CH8;!CH8;CH9;!CH9;CH10;!CH10;CH11;!CH11;CH12;!CH12";
 static char headtrackerOut[7] = {0};
 
 
@@ -233,10 +233,10 @@ static struct luaItem_selection luaDvrStopDelay = {
     "0s;5s;15s;30s;45s;1min;2min",
     emptySpace};
 
-static struct luaItem_selection luaHeadtrackAux = {
-    {"Headtrack AUX", CRSF_TEXT_SELECTION},
+static struct luaItem_selection luaHeadtrackCh = {
+    {"Headtrack Ch", CRSF_TEXT_SELECTION},
     0, // value
-    headtrackerOpts4ch,
+    headtrackerOptsLowRes,
     emptySpace};
 
 //---------------------------- BACKPACK ------------------
@@ -673,10 +673,9 @@ static void registerLuaParameters()
           },
           luaBackpackFolder.common.id);
       registerLUAParameter(
-          &luaHeadtrackAux, [](luaPropertiesCommon *item, uint8_t arg) {
-              config.SetHeadtrackAux(arg);
-          },
-          luaBackpackFolder.common.id);
+          &luaHeadtrackCh, [](luaPropertiesCommon *item, uint8_t arg) {
+              config.SetHeadtrackCh(arg);
+          });
     }
   }
 
@@ -732,13 +731,17 @@ static int event()
     setLuaTextSelectionValue(&luaDvrAux, config.GetDvrAux());
     setLuaTextSelectionValue(&luaDvrStartDelay, config.GetDvrStartDelay());
     setLuaTextSelectionValue(&luaDvrStopDelay, config.GetDvrStopDelay());
-    setLuaTextSelectionValue(&luaHeadtrackAux, config.GetHeadtrackAux());
-    luaHeadtrackAux.options = OtaIsFullRes ? headtrackerOpts8ch : headtrackerOpts4ch;
-    if(OtaIsFullRes)
-      sprintf(headtrackerOut, "Aux%u&%u",(config.GetHeadtrackAux()+1)/2, (config.GetHeadtrackAux()+1)/2+1);
+    
+    setLuaTextSelectionValue(&luaHeadtrackCh, config.GetHeadtrackCh());
+    luaHeadtrackCh.options = OtaIsFullRes ? headtrackerOptsFullRes : headtrackerOptsLowRes;
+    uint8_t currentHeadtrack = config.GetHeadtrackCh();
+    if(OtaIsFullRes && currentHeadtrack>0)
+      sprintf(headtrackerOut, " Aux%u&%u",(currentHeadtrack+1)/2, (currentHeadtrack+1)/2+1);
+    else if(!OtaIsFullRes && currentHeadtrack>0)
+      config.SetHeadtrackCh(0);
     else
-      sprintf(headtrackerOut, "");
-    luaHeadtrackAux.units = headtrackerOut; 
+      strcpy(headtrackerOut, "");
+    luaHeadtrackCh.units = headtrackerOut; 
   }
 #if defined(TARGET_TX_FM30)
   setLuaTextSelectionValue(&luaBluetoothTelem, !digitalRead(GPIO_PIN_BLUETOOTH_EN));
